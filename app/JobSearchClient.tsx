@@ -44,10 +44,10 @@ function Nav() {
         </a>
         <div style={{ display: 'flex', gap: 20 }}>
           {[
-            { label: 'Jobs finden', href: '/' },
-            { label: 'Firmen', href: '/?tab=firmen' },
-            { label: 'Ausbildung', href: '/?art=Ausbildung' },
-            { label: 'Praktikum', href: '/?art=Praktikum' },
+            { label: 'Jobs finden',  href: '/' },
+            { label: 'Ausbildung',   href: '/ausbildung' },
+            { label: 'Praktikum',    href: '/praktikum' },
+            { label: 'Minijobs',     href: '/minijob' },
           ].map(l => (
             <a key={l.label} href={l.href} style={{ fontSize: 13, color: '#666', textDecoration: 'none', fontWeight: 500 }}>{l.label}</a>
           ))}
@@ -271,6 +271,24 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
 
         {/* RIGHT: Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Branchen Links */}
+          <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '16px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Jobs nach Branche</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {[
+                { slug: 'handwerk',       label: 'Handwerk' },
+                { slug: 'lager-logistik', label: 'Lager & Logistik' },
+                { slug: 'gastronomie',    label: 'Gastronomie' },
+                { slug: 'einzelhandel',   label: 'Einzelhandel' },
+                { slug: 'produktion',     label: 'Produktion' },
+                { slug: 'gesundheit',     label: 'Gesundheit' },
+              ].map(b => (
+                <a key={b.slug} href={`/jobs/${b.slug}`} style={{ fontSize: 12, color: '#555', textDecoration: 'none', padding: '3px 0', borderBottom: '1px solid #f5f5f5' }}>
+                  {b.label} Jobs →
+                </a>
+              ))}
+            </div>
+          </div>
 
           {/* Dashboard banner */}
           <div style={{ background: '#18181b', borderRadius: 12, padding: '18px 16px', color: '#fff' }}>
@@ -329,6 +347,46 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
                 <div style={{ fontSize: 11, color: '#aaa', textAlign: 'center', padding: '8px 0' }}>Noch keine Firmen</div>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div style={{ background: '#fff', borderTop: '1px solid #e5e5e5', padding: '48px 32px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111', letterSpacing: '-0.03em', marginBottom: 8 }}>
+            Häufige Fragen
+          </h2>
+          <p style={{ fontSize: 13, color: '#888', marginBottom: 32 }}>Alles, was du über QR-Docs Jobs wissen musst.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {[
+              {
+                q: 'Wie finde ich einen Job im Handwerk?',
+                a: 'Nutze die Branchenfilter links oder besuche direkt /jobs/handwerk. Alle Stellen stammen von verifizierten KMU — kein Spam, keine Fake-Inserate.',
+              },
+              {
+                q: 'Wie schalte ich eine Stellenanzeige?',
+                a: 'Melde dich mit deinem QR-Docs Konto an und klicke auf "+ Stelle ausschreiben". Titel, Branche, Stellenart, Gehalt — fertig. Deine Stelle erscheint sofort.',
+              },
+              {
+                q: 'Was kostet eine Stelle bei QR-Docs Jobs?',
+                a: 'Für QR-Docs Nutzer kostenlos. Business- und Enterprise-Kunden bekommen zusätzlich Featured-Platzierungen und das "QR-Docs verifiziert" Badge.',
+              },
+            ].map((faq, i) => (
+              <details
+                key={i}
+                style={{ borderTop: '1px solid #e5e5e5', padding: '16px 0' }}
+              >
+                <summary style={{ fontSize: 15, fontWeight: 700, color: '#111', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                  {faq.q}
+                  <span style={{ fontSize: 18, color: '#aaa', flexShrink: 0 }}>+</span>
+                </summary>
+                <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, margin: '12px 0 0', paddingRight: 32 }}>
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+            <div style={{ borderTop: '1px solid #e5e5e5' }} />
           </div>
         </div>
       </div>
