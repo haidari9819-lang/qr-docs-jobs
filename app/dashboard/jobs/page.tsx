@@ -6,7 +6,7 @@ export default async function JobsDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect(`https://www.qr-docs.de/auth/login?redirect=${encodeURIComponent('https://jobs.qr-docs.de/dashboard/jobs')}`)
+  if (!user) redirect('/login?redirect=/dashboard/jobs')
 
   const { data: profil } = await supabase
     .from('firmen_profile')
@@ -14,7 +14,7 @@ export default async function JobsDashboardPage() {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!profil) redirect('https://www.qr-docs.de/dashboard')
+  if (!profil) redirect('/')
 
   // Fetch this firma's jobs with application counts
   const { data: jobs } = await supabase

@@ -6,7 +6,7 @@ export default async function AusschreibenPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect(`https://www.qr-docs.de/auth/login?redirect=${encodeURIComponent('https://jobs.qr-docs.de/ausschreiben')}`)
+  if (!user) redirect('/login?redirect=/ausschreiben')
 
   const { data: profil } = await supabase
     .from('firmen_profile')
