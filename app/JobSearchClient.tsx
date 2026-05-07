@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { avatarColor, initials, formatDate, BRANCHEN, STELLENARTEN } from '@/lib/helpers'
+import JobAlert from './components/JobAlert'
 
 const MAIN = 'https://www.qr-docs.de'
 
@@ -257,10 +258,13 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
             <strong style={{ color: '#111' }}>{filtered.length}</strong> Stellen gefunden
           </div>
           {filtered.length === 0 ? (
-            <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '48px 24px', textAlign: 'center' }}>
-              <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>💼</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 6 }}>Keine Stellen gefunden</div>
-              <div style={{ fontSize: 12, color: '#999' }}>Passe deine Suche an oder schreibe eine Stelle aus</div>
+            <div>
+              <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '32px 24px', textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>💼</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 6 }}>Keine Stellen gefunden</div>
+                <div style={{ fontSize: 12, color: '#999' }}>Passe deine Suche an oder aktiviere einen Job-Alert</div>
+              </div>
+              <JobAlert region={region || undefined} branche={branche || undefined} />
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

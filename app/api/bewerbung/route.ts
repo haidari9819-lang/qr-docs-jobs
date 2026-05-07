@@ -1,23 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/server'
+import { Resend } from 'resend'
 
 export async function POST(req: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   try {
-    const form = await req.formData()
-    const job_id     = form.get('job_id') as string
-    const name       = form.get('name') as string
-    const email      = form.get('email') as string
-    const telefon    = form.get('telefon') as string | null
-    const anschreiben= form.get('anschreiben') as string | null
-    const file       = form.get('lebenslauf') as File | null
+    const form        = await req.formData()
+    const job_id      = form.get('job_id') as string
+    const name        = form.get('name') as string
+    const telefon     = form.get('telefon') as string
+    const email       = form.get('email') as string | null
+    const anschreiben = form.get('anschreiben') as string | null
+    const file        = form.get('lebenslauf') as File | null
 
-    if (!job_id || !name || !email) {
-      return NextResponse.json({ error: 'Pflichtfelder fehlen' }, { status: 400 })
+    if (!job_id || !name || !telefon) {
+      return NextResponse.json({ error: 'Name und Telefon sind Pflichtfelder' }, { status: 400 })
     }
 
     const admin = getAdminClient()
 
-    // Optional: upload Lebenslauf to Supabase Storage
+    // Load job + firma info for email
+    const { data: job } = await admin
+      .from('job_listings')
+      .select('titel, firmen_profile(firmenname, email)')
+      .eq('id', job_id)
+      .single()
+
+    // Optional: upload CV to Supabase Storage
     let lebenslauf_url: string | null = null
     if (file && file.size > 0) {
       const bytes = await file.arrayBuffer()
@@ -33,14 +42,43 @@ export async function POST(req: NextRequest) {
     }
 
     const { error } = await admin.from('job_bewerbungen').insert({
-      job_id, name, email,
-      telefon: telefon || null,
+      job_id,
+      name,
+      telefon,
+      email: email || null,
       anschreiben: anschreiben || null,
       lebenslauf_url,
       status: 'neu',
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    // Send email notification to firma
+    const firmaEmail = (job?.firmen_profile as any)?.email
+    if (firmaEmail && process.env.RESEND_API_KEY) {
+      const jobTitel = job?.titel ?? 'Ihrer Stelle'
+      const firmaName = (job?.firmen_profile as any)?.firmenname ?? 'Ihr Unternehmen'
+      await resend.emails.send({
+        from:    'QR-Docs Jobs <jobs@qr-docs.de>',
+        to:      firmaEmail,
+        subject: `Neue Bewerbung: ${jobTitel} — ${name}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:540px;margin:0 auto">
+            <h2 style="color:#111">Neue Bewerbung eingegangen</h2>
+            <p style="color:#555">Für die Stelle <strong>${jobTitel}</strong> bei ${firmaName} hat sich jemand beworben.</p>
+            <table style="width:100%;border-collapse:collapse;margin:24px 0">
+              <tr><td style="padding:8px 0;color:#888;font-size:13px">Name</td><td style="padding:8px 0;color:#111;font-weight:600">${name}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;font-size:13px">Telefon</td><td style="padding:8px 0;color:#111;font-weight:600">${telefon}</td></tr>
+              ${email ? `<tr><td style="padding:8px 0;color:#888;font-size:13px">E-Mail</td><td style="padding:8px 0;color:#111">${email}</td></tr>` : ''}
+              ${anschreiben ? `<tr><td style="padding:8px 0;color:#888;font-size:13px;vertical-align:top">Nachricht</td><td style="padding:8px 0;color:#111">${anschreiben}</td></tr>` : ''}
+              ${lebenslauf_url ? `<tr><td style="padding:8px 0;color:#888;font-size:13px">Lebenslauf</td><td style="padding:8px 0"><a href="${lebenslauf_url}" style="color:#E05C1A">Download</a></td></tr>` : ''}
+            </table>
+            <p style="font-size:12px;color:#aaa">Gesendet über QR-Docs Jobs · jobs.qr-docs.de</p>
+          </div>
+        `,
+      }).catch(() => {}) // non-fatal if email fails
+    }
+
     return NextResponse.json({ success: true })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })

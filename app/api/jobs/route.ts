@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
     const body = await req.json()
-    const { titel, stellenart, branche, standort, beschreibung, gehalt_min, gehalt_max, skills, is_featured, firma_id } = body
+    const { titel, stellenart, branche, standort, beschreibung, gehalt_min, gehalt_max, skills, is_featured, firma_id, preis_typ } = body
 
     if (!titel || !standort || !beschreibung || !firma_id) {
       return NextResponse.json({ error: 'Pflichtfelder fehlen' }, { status: 400 })
@@ -19,19 +19,20 @@ export async function POST(req: NextRequest) {
       user_id: user.id,
       firma_id,
       titel,
-      stellenart: stellenart ?? 'Vollzeit',
-      branche: branche ?? '',
+      stellenart:  stellenart  ?? 'Vollzeit',
+      branche:     branche     ?? '',
       standort,
       beschreibung,
-      gehalt_min: gehalt_min ?? null,
-      gehalt_max: gehalt_max ?? null,
-      skills: skills ?? [],
+      gehalt_min:  gehalt_min  ?? null,
+      gehalt_max:  gehalt_max  ?? null,
+      skills:      skills      ?? [],
       is_featured: is_featured ?? false,
-      is_active: true,
+      preis_typ:   preis_typ   ?? 'kostenlos',
+      is_active:   true,
     }).select().single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-    return NextResponse.json({ success: true, job: data })
+    return NextResponse.json({ success: true, id: data.id, job: data })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
