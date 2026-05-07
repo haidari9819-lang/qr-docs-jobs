@@ -46,7 +46,7 @@ export default async function HomePage() {
 
   const { data: jobs, error: jobsError } = await supabase
     .from('job_listings')
-    .select('*, firmen_profile!left(firmenname, branche, standort, plan)')
+    .select('*')
     .eq('aktiv', true)
     .order('featured', { ascending: false })
     .order('created_at',  { ascending: false })
@@ -71,6 +71,7 @@ export default async function HomePage() {
     </>
   )
 }
+
 
 
 
