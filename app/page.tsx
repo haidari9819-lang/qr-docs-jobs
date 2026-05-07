@@ -2,7 +2,7 @@ import { getAdminClient } from '@/lib/supabase/server'
 import { Metadata }     from 'next'
 import JobSearchClient  from './JobSearchClient'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title:       'Jobs für KMU & Handwerk | QR-Docs Jobs',
