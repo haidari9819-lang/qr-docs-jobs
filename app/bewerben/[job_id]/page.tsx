@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase/server'
 import { notFound }     from 'next/navigation'
 import { Metadata }     from 'next'
 import BewerbenClient   from './BewerbenClient'
@@ -7,7 +7,7 @@ interface Props { params: Promise<{ job_id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { job_id } = await params
-  const supabase   = await createClient()
+  const supabase   = getAdminClient()
   const { data: job } = await supabase
     .from('job_listings')
     .select('titel, firmen_profile(firmenname)')
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BewerbenPage({ params }: Props) {
   const { job_id } = await params
-  const supabase   = await createClient()
+  const supabase   = getAdminClient()
 
   const { data: job } = await supabase
     .from('job_listings')

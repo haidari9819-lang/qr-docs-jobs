@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAdminClient } from '@/lib/supabase/server'
 import { notFound }     from 'next/navigation'
 import { Metadata }     from 'next'
 import JobDetailClient  from './JobDetailClient'
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       alternates:  { canonical: `${BASE}/jobs/${id}` },
     }
   }
-  const supabase = await createClient()
+  const supabase = getAdminClient()
   const { data: job } = await supabase
     .from('job_listings')
     .select('titel, branche, standort')
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function JobPage({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = getAdminClient()
 
   // ── Branche landing page ──────────────────────────────────────────────────
   const brancheInfo = BRANCHEN_SEO[id]
@@ -56,7 +56,7 @@ export default async function JobPage({ params }: Props) {
 
   const { data: job } = await supabase
     .from('job_listings')
-    .select('*, firmen_profile(firmenname, branche, standort, strasse, plz, email, plan)')
+    .select('*, firmen_profile(firmenname, branche, standort, strasse, plz, email, plan, verified)')
     .eq('id', id)
     .single()
 
@@ -86,7 +86,7 @@ export default async function JobPage({ params }: Props) {
           '@type':    'QuantitativeValue',
           minValue:   job.gehalt_min,
           maxValue:   job.gehalt_max ?? job.gehalt_min,
-          unitText:   'YEAR',
+          unitText:   'MONTH',
         },
       },
     } : {}),

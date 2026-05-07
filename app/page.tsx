@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase/server'
 import { Metadata }     from 'next'
 import JobSearchClient  from './JobSearchClient'
 
@@ -42,7 +42,7 @@ const faqSchema = {
 }
 
 export default async function HomePage() {
-  const supabase = await createClient()
+  const supabase = getAdminClient()
 
   const { data: jobs } = await supabase
     .from('job_listings')

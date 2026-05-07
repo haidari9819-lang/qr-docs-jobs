@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase/server'
 import { avatarColor, initials, formatDate } from '@/lib/helpers'
 import { STELLENART_SEO } from '@/lib/seo-data'
 
@@ -48,7 +48,7 @@ export default async function StellensartPage({ artSlug }: { artSlug: string }) 
   const info = STELLENART_SEO[artSlug]
   if (!info) return null
 
-  const supabase = await createClient()
+  const supabase = getAdminClient()
   const { data: jobs } = await supabase
     .from('job_listings')
     .select('*, firmen_profile(firmenname, standort, plan)')
