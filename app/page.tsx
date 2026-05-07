@@ -44,13 +44,13 @@ const faqSchema = {
 export default async function HomePage() {
   const supabase = getAdminClient()
 
-  const { data: jobs } = await supabase
+  const { data: jobs, error: jobsError } = await supabase
     .from('job_listings')
     .select('*, firmen_profile(firmenname, branche, standort, plan)')
     .eq('aktiv', true)
     .order('featured', { ascending: false })
     .order('created_at',  { ascending: false })
-    .limit(50)
+    .limit(50); console.error("JOBS_ERROR:", JSON.stringify(jobsError)); console.log("JOBS_COUNT:", jobs?.length)
 
   const [{ count: jobCount }, { count: firmaCount }, { count: ausbildungCount }] = await Promise.all([
     supabase.from('job_listings').select('*',       { count: 'exact', head: true }).eq('aktiv', true),
@@ -71,4 +71,5 @@ export default async function HomePage() {
     </>
   )
 }
+
 
