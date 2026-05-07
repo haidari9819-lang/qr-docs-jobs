@@ -43,7 +43,7 @@ export default async function JobPage({ params }: Props) {
   if (brancheInfo) {
     const { data: jobs } = await supabase
       .from('job_listings')
-      .select('*, firmen_profile(firmenname, branche, standort, plan)')
+      .select('*')
       .eq('aktiv', true)
       .eq('branche', brancheInfo.dbValue)
       .order('featured', { ascending: false })
@@ -56,7 +56,7 @@ export default async function JobPage({ params }: Props) {
 
   const { data: job } = await supabase
     .from('job_listings')
-    .select('*, firmen_profile(firmenname, branche, standort, strasse, plz, email, plan, verified)')
+    .select('*')
     .eq('id', id)
     .single()
 
@@ -102,4 +102,5 @@ export default async function JobPage({ params }: Props) {
     </>
   )
 }
+
 
