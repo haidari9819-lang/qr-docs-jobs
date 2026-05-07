@@ -47,15 +47,15 @@ export default async function HomePage() {
   const { data: jobs } = await supabase
     .from('job_listings')
     .select('*, firmen_profile(firmenname, branche, standort, plan)')
-    .eq('is_active', true)
-    .order('is_featured', { ascending: false })
+    .eq('aktiv', true)
+    .order('featured', { ascending: false })
     .order('created_at',  { ascending: false })
     .limit(50)
 
   const [{ count: jobCount }, { count: firmaCount }, { count: ausbildungCount }] = await Promise.all([
-    supabase.from('job_listings').select('*',       { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('job_listings').select('firma_id',{ count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('job_listings').select('*',       { count: 'exact', head: true }).eq('is_active', true).eq('stellenart', 'Ausbildung'),
+    supabase.from('job_listings').select('*',       { count: 'exact', head: true }).eq('aktiv', true),
+    supabase.from('job_listings').select('firma_id',{ count: 'exact', head: true }).eq('aktiv', true),
+    supabase.from('job_listings').select('*',       { count: 'exact', head: true }).eq('aktiv', true).eq('stellenart', 'Ausbildung'),
   ])
 
   return (
@@ -71,3 +71,4 @@ export default async function HomePage() {
     </>
   )
 }
+

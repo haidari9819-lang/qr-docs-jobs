@@ -49,7 +49,7 @@ export default function AusschreibenClient({ profil, userId }: Props) {
           gehalt_min:  gehaltMin ? Number(gehaltMin) : null,
           gehalt_max:  gehaltMax ? Number(gehaltMax) : null,
           skills,
-          is_featured: false,
+          featured: false,
           preis_typ:   'kostenlos',
           firma_id:    profil.id,
           user_id:     userId,
@@ -272,3 +272,4 @@ export default function AusschreibenClient({ profil, userId }: Props) {
     </div>
   )
 }
+

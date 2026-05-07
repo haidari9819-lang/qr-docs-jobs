@@ -16,3 +16,4 @@ export default async function AusschreibenPage() {
 
   return <AusschreibenClient profil={profil} userId={user.id} />
 }
+

@@ -30,10 +30,11 @@ export default async function BewerbenPage({ params }: Props) {
     .from('job_listings')
     .select('id, titel, standort, stellenart, branche, firmen_profile(firmenname)')
     .eq('id', job_id)
-    .eq('is_active', true)
+    .eq('aktiv', true)
     .single()
 
   if (!job) notFound()
 
   return <BewerbenClient job={job as any} />
 }
+

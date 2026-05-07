@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     const { data: jobs } = await admin
       .from('job_listings')
       .select('id, titel, branche, standort, beschreibung, skills')
-      .eq('is_active', true)
+      .eq('aktiv', true)
       .limit(20)
 
     if (!jobs || jobs.length === 0) {
@@ -74,3 +74,4 @@ Antworte NUR mit validem JSON (kein Markdown, kein Text davor/danach):
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
+

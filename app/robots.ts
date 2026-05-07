@@ -6,3 +6,4 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: 'https://jobs.qr-docs.de/sitemap.xml',
   }
 }
+

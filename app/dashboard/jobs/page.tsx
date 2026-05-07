@@ -31,3 +31,4 @@ export default async function JobsDashboardPage() {
 
   return <JobsDashboardClient profil={profil} jobs={jobs ?? []} bewerbungen={bewerbungen ?? []} />
 }
+

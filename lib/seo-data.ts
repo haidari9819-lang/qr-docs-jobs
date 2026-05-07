@@ -76,3 +76,4 @@ export const STELLENART_SEO: Record<string, { dbValue: string; h1: string; title
     description: 'Teilzeitstellen bei mittelständischen Unternehmen: Handwerk, Büro, Handel. Jetzt Teilzeit Job finden.',
   },
 }
+

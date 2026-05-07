@@ -5,7 +5,15 @@
       "Bash(npm install:*)",
       "Bash(npm list:*)",
       "Bash(npm run:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx vercel:*)",
+      "Bash(curl -s https://jobs.qr-docs.de/api/debug-env)",
+      "Bash(python -m json.tool)",
+      "Bash(grep -E \"^\\\\s+[○ƒ].+\\\\s+/$\")",
+      "Bash(curl -s https://jobs.qr-docs.de)",
+      "Bash(python -c \"import sys; html=sys.stdin.read\\(\\); print\\('Jobs found' if 'Elektriker' in html or 'Lagerleiter' in html else 'No jobs in HTML'\\); print\\('Page size:', len\\(html\\), 'bytes'\\); print\\('Has initialJobs:', 'initialJobs' in html\\)\")"
     ]
   }
 }

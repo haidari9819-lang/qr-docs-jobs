@@ -32,3 +32,4 @@ export async function GET(req: NextRequest) {
     return fail('Fehler bei der Verifizierung')
   }
 }
+

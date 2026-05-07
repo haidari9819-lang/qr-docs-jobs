@@ -15,7 +15,7 @@ interface Job {
   gehalt_min?: number
   gehalt_max?: number
   skills?: string[]
-  is_featured: boolean
+  featured: boolean
   created_at: string
   firma_id: string
   firmen_profile?: { firmenname: string; branche?: string; standort?: string; plan?: string }
@@ -81,7 +81,7 @@ function JobCard({ job }: { job: Job }) {
     <a href={`/jobs/${job.id}`} style={{
       display: 'block', textDecoration: 'none',
       background: '#fff',
-      border: `1px solid ${job.is_featured ? '#f59e0b' : '#e5e5e5'}`,
+      border: `1px solid ${job.featured ? '#f59e0b' : '#e5e5e5'}`,
       borderRadius: 12,
       padding: '16px 18px',
       transition: 'box-shadow .12s',
@@ -90,7 +90,7 @@ function JobCard({ job }: { job: Job }) {
     onMouseEnter={e => (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'}
     onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow = 'none'}
     >
-      {job.is_featured && (
+      {job.featured && (
         <span style={{
           position: 'absolute', top: 12, right: 12,
           background: '#faeeda', color: '#854F0B',
@@ -397,3 +397,4 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
     </div>
   )
 }
+

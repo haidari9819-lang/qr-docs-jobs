@@ -52,9 +52,9 @@ export default async function StellensartPage({ artSlug }: { artSlug: string }) 
   const { data: jobs } = await supabase
     .from('job_listings')
     .select('*, firmen_profile(firmenname, standort, plan)')
-    .eq('is_active', true)
+    .eq('aktiv', true)
     .eq('stellenart', info.dbValue)
-    .order('is_featured', { ascending: false })
+    .order('featured', { ascending: false })
     .order('created_at',  { ascending: false })
 
   return (
@@ -114,3 +114,4 @@ export default async function StellensartPage({ artSlug }: { artSlug: string }) 
     </div>
   )
 }
+

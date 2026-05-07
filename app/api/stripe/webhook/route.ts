@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       await admin
         .from('job_listings')
         .update({
-          is_featured:       true,
+          featured:       true,
           preis_typ:         'premium',
           stripe_payment_id: session.payment_intent as string,
         })
@@ -37,3 +37,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ received: true })
 }
+

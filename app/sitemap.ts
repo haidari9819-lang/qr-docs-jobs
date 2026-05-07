@@ -41,3 +41,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/ausschreiben`, changeFrequency: 'monthly', priority: 0.5 },
   ]
 }
+

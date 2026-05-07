@@ -70,3 +70,4 @@ export const ALL_SKILLS = [
   'DATEV', 'HR', 'Dokumentation', 'Controlling', 'Warenwirtschaft',
   'Team', 'Kundenservice', 'Verkauf', 'Buchhaltung', 'IT',
 ]
+

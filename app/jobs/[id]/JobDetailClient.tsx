@@ -15,7 +15,7 @@ interface Job {
   gehalt_min?: number
   gehalt_max?: number
   skills?: string[]
-  is_featured: boolean
+  featured: boolean
   created_at: string
   firmen_profile?: {
     firmenname: string
@@ -297,7 +297,7 @@ export default function JobDetailClient({ job }: { job: Job }) {
                   {isVerified && (
                     <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 700 }}>✓ QR-Docs verifiziert</span>
                   )}
-                  {job.is_featured && (
+                  {job.featured && (
                     <span style={{ fontSize: 10, fontWeight: 700, background: '#faeeda', color: '#854F0B', padding: '2px 6px', borderRadius: 4 }}>
                       ⭐ Featured
                     </span>
@@ -473,3 +473,4 @@ export default function JobDetailClient({ job }: { job: Job }) {
     </div>
   )
 }
+

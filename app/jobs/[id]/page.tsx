@@ -44,9 +44,9 @@ export default async function JobPage({ params }: Props) {
     const { data: jobs } = await supabase
       .from('job_listings')
       .select('*, firmen_profile(firmenname, branche, standort, plan)')
-      .eq('is_active', true)
+      .eq('aktiv', true)
       .eq('branche', brancheInfo.dbValue)
-      .order('is_featured', { ascending: false })
+      .order('featured', { ascending: false })
       .order('created_at',  { ascending: false })
     return <BranchePageClient brancheSlug={id} brancheInfo={brancheInfo} jobs={jobs ?? []} />
   }
@@ -102,3 +102,4 @@ export default async function JobPage({ params }: Props) {
     </>
   )
 }
+

@@ -8,8 +8,8 @@ interface Job {
   stellenart: string
   standort: string
   branche: string
-  is_active: boolean
-  is_featured: boolean
+  aktiv: boolean
+  featured: boolean
   created_at: string
 }
 
@@ -42,7 +42,7 @@ export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const jobBewerbungen = (jobId: string) => bewerbungen.filter(b => b.job_id === jobId)
-  const activeJobs     = jobs.filter(j => j.is_active)
+  const activeJobs     = jobs.filter(j => j.aktiv)
   const todayStr       = new Date().toDateString()
   const newToday       = bewerbungen.filter(b => new Date(b.created_at).toDateString() === todayStr).length
 
@@ -50,7 +50,7 @@ export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props
     await fetch(`/api/jobs/${job.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_active: !job.is_active }),
+      body: JSON.stringify({ aktiv: !job.aktiv }),
     })
     window.location.reload()
   }
@@ -144,16 +144,16 @@ export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props
                     {/* Status */}
                     <span style={{
                       fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 99,
-                      background: job.is_active ? 'rgba(34,197,94,0.12)' : 'rgba(100,116,139,0.12)',
-                      color: job.is_active ? '#16a34a' : '#64748b',
+                      background: job.aktiv ? 'rgba(34,197,94,0.12)' : 'rgba(100,116,139,0.12)',
+                      color: job.aktiv ? '#16a34a' : '#64748b',
                     }}>
-                      {job.is_active ? '● AKTIV' : '○ PAUSIERT'}
+                      {job.aktiv ? '● AKTIV' : '○ PAUSIERT'}
                     </span>
 
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button onClick={() => toggleJob(job)} style={{ padding: '5px 10px', background: 'none', border: '1px solid #e5e5e5', borderRadius: 7, cursor: 'pointer', fontSize: 11, color: '#555' }}>
-                        {job.is_active ? 'Pausieren' : 'Aktivieren'}
+                        {job.aktiv ? 'Pausieren' : 'Aktivieren'}
                       </button>
                       <a href={`/ausschreiben?edit=${job.id}`} style={{ padding: '5px 10px', background: 'none', border: '1px solid #e5e5e5', borderRadius: 7, cursor: 'pointer', fontSize: 11, color: '#555', textDecoration: 'none' }}>
                         Bearbeiten
@@ -201,3 +201,4 @@ export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props
     </div>
   )
 }
+

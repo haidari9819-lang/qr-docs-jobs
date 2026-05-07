@@ -30,10 +30,10 @@ export default async function StadtBranchePage({ params }: Props) {
   const { data: jobs } = await supabase
     .from('job_listings')
     .select('*, firmen_profile(firmenname, branche, standort, plan)')
-    .eq('is_active', true)
+    .eq('aktiv', true)
     .eq('branche', brancheInfo.dbValue)
     .ilike('standort', `%${stadtLabel}%`)
-    .order('is_featured', { ascending: false })
+    .order('featured', { ascending: false })
     .order('created_at',  { ascending: false })
 
   const schema = {
@@ -62,3 +62,4 @@ export default async function StadtBranchePage({ params }: Props) {
     </>
   )
 }
+

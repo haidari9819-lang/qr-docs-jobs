@@ -113,3 +113,4 @@ export default function JobAlert({ region, branche }: Props) {
     </div>
   )
 }
+
