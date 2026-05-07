@@ -62,7 +62,7 @@ function Nav() {
           padding: '7px 14px', background: '#18181b', color: '#fff',
           borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none',
         }}>
-          + Stelle ausschreiben
+          + Stelle kostenlos ausschreiben
         </a>
       </div>
     </nav>
@@ -177,7 +177,7 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
             Der Jobmarkt für KMU & Handwerk
           </h1>
           <p style={{ fontSize: 15, color: '#666', margin: '0 0 28px' }}>
-            Echte Stellen. Verifizierte Unternehmen. Kein Spam.
+            Echte Stellen. Verifizierte Unternehmen. Kostenlos inserieren — für immer.
           </p>
 
           {/* Search bar */}
@@ -305,7 +305,7 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
               background: '#fff', color: '#18181b', borderRadius: 7,
               fontSize: 12, fontWeight: 700, textDecoration: 'none',
             }}>
-              + Stelle ausschreiben
+              + Kostenlos inserieren
             </a>
           </div>
 
@@ -374,7 +374,7 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
               },
               {
                 q: 'Was kostet eine Stelle bei QR-Docs Jobs?',
-                a: 'Für QR-Docs Nutzer kostenlos. Business- und Enterprise-Kunden bekommen zusätzlich Featured-Platzierungen und das "QR-Docs verifiziert" Badge.',
+                a: 'Komplett kostenlos — für immer. Einfach anmelden und Stelle ausschreiben. Kein Abo, keine versteckten Kosten.',
               },
             ].map((faq, i) => (
               <details

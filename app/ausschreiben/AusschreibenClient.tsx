@@ -18,29 +18,7 @@ interface Props {
 const LABEL: React.CSSProperties = { fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: '#aaa', textTransform: 'uppercase', display: 'block', marginBottom: 5 }
 const INPUT: React.CSSProperties = { width: '100%', padding: '9px 12px', border: '1px solid #e5e5e5', borderRadius: 8, fontSize: 13, color: '#111', background: '#fafafa', outline: 'none', boxSizing: 'border-box' }
 
-const PLANS = [
-  {
-    id:       'kostenlos',
-    label:    'Kostenlos',
-    price:    '0 €',
-    sub:      '30 Tage',
-    features: ['Standard-Platzierung', '30 Tage aktiv', 'Unbegrenzte Bewerbungen'],
-    featured: false,
-    stripe:   null,
-  },
-  {
-    id:       'premium',
-    label:    'Premium',
-    price:    '49 €',
-    sub:      '60 Tage · einmalig',
-    features: ['⭐ Featured Badge', 'Oben in Suchergebnissen', '60 Tage aktiv', 'Mehr Sichtbarkeit'],
-    featured: true,
-    stripe:   process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
-  },
-]
-
 export default function AusschreibenClient({ profil, userId }: Props) {
-  const [plan,         setPlan]         = useState<'kostenlos' | 'premium'>('kostenlos')
   const [titel,        setTitel]        = useState('')
   const [stellenart,   setStellenart]   = useState('Vollzeit')
   const [branche,      setBranche]      = useState(profil?.branche ?? '')
@@ -71,8 +49,8 @@ export default function AusschreibenClient({ profil, userId }: Props) {
           gehalt_min:  gehaltMin ? Number(gehaltMin) : null,
           gehalt_max:  gehaltMax ? Number(gehaltMax) : null,
           skills,
-          is_featured: plan === 'premium',
-          preis_typ:   plan,
+          is_featured: false,
+          preis_typ:   'kostenlos',
           firma_id:    profil.id,
           user_id:     userId,
         }),
@@ -80,19 +58,6 @@ export default function AusschreibenClient({ profil, userId }: Props) {
       const data = await res.json()
       if (data.success && data.id) {
         setNewJobId(data.id)
-        // If premium, redirect to Stripe Checkout
-        if (plan === 'premium') {
-          const checkoutRes = await fetch('/api/stripe/checkout', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ job_id: data.id, plan: 'premium' }),
-          })
-          const checkoutData = await checkoutRes.json()
-          if (checkoutData.url) {
-            window.location.href = checkoutData.url
-            return
-          }
-        }
       } else {
         setError(data.error ?? 'Fehler')
       }
@@ -102,12 +67,12 @@ export default function AusschreibenClient({ profil, userId }: Props) {
     setSaving(false)
   }
 
-  const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://jobs.qr-docs.de'
-  const bewerbenUrl = newJobId ? `${BASE}/bewerben/${newJobId}` : null
+  const base        = typeof window !== 'undefined' ? window.location.origin : 'https://jobs.qr-docs.de'
+  const bewerbenUrl = newJobId ? `${base}/bewerben/${newJobId}` : null
   const qrUrl       = bewerbenUrl ? `/api/qr?url=${encodeURIComponent(bewerbenUrl)}&size=280` : null
 
-  // Success screen
-  if (newJobId && plan !== 'premium') {
+  // ── Success screen ──────────────────────────────────────────────────────────
+  if (newJobId) {
     return (
       <div>
         <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: '#fff', borderBottom: '1px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', height: 56 }}>
@@ -125,7 +90,7 @@ export default function AusschreibenClient({ profil, userId }: Props) {
             Stelle veröffentlicht!
           </h1>
           <p style={{ fontSize: 14, color: '#555', marginBottom: 32 }}>
-            Deine Stelle ist jetzt live. Bewerber können sich direkt bewerben — ohne Account.
+            Kostenlos und sofort live. Bewerber können sich ohne Account direkt bewerben.
           </p>
 
           {/* QR Code */}
@@ -135,7 +100,7 @@ export default function AusschreibenClient({ profil, userId }: Props) {
                 QR-Code für Aushang & Baustelle
               </div>
               <div style={{ fontSize: 12, color: '#888', marginBottom: 20 }}>
-                Bewerber scannen den Code und landen direkt auf dem Bewerbungsformular.
+                Bewerber scannen den Code und landen direkt auf dem Bewerbungsformular — kein Account nötig.
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -145,13 +110,9 @@ export default function AusschreibenClient({ profil, userId }: Props) {
               />
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <a
-                  href={qrUrl + '&size=600'}
+                  href={`/api/qr?url=${encodeURIComponent(bewerbenUrl!)}&size=600`}
                   download="qr-bewerbung.png"
-                  style={{
-                    padding: '9px 18px', background: '#18181b', color: '#fff',
-                    borderRadius: 8, fontSize: 13, fontWeight: 600,
-                    textDecoration: 'none', display: 'inline-block',
-                  }}
+                  style={{ padding: '9px 18px', background: '#18181b', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
                 >
                   ↓ QR-Code herunterladen
                 </a>
@@ -159,12 +120,7 @@ export default function AusschreibenClient({ profil, userId }: Props) {
                   href={bewerbenUrl!}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    padding: '9px 18px', background: '#f5f5f4',
-                    border: '1px solid #e5e5e5', color: '#111',
-                    borderRadius: 8, fontSize: 13, fontWeight: 600,
-                    textDecoration: 'none', display: 'inline-block',
-                  }}
+                  style={{ padding: '9px 18px', background: '#f5f5f4', border: '1px solid #e5e5e5', color: '#111', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
                 >
                   Bewerbungslink öffnen ↗
                 </a>
@@ -185,9 +141,9 @@ export default function AusschreibenClient({ profil, userId }: Props) {
     )
   }
 
+  // ── Form ────────────────────────────────────────────────────────────────────
   return (
     <div>
-      {/* Nav */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: '#fff', borderBottom: '1px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', height: 56 }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <div style={{ width: 28, height: 28, background: '#18181b', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -203,8 +159,12 @@ export default function AusschreibenClient({ profil, userId }: Props) {
 
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px' }}>
         <div style={{ marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: '-0.03em', color: '#111' }}>Stelle ausschreiben</h1>
-          <p style={{ fontSize: 13, color: '#666', margin: 0 }}>Nach der Veröffentlichung erhältst du automatisch einen QR-Code zum Ausdrucken.</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: '-0.03em', color: '#111' }}>
+            Stelle kostenlos ausschreiben
+          </h1>
+          <p style={{ fontSize: 13, color: '#666', margin: 0 }}>
+            Nach der Veröffentlichung erhältst du automatisch einen QR-Code zum Ausdrucken.
+          </p>
         </div>
 
         {!profil && (
@@ -221,47 +181,6 @@ export default function AusschreibenClient({ profil, userId }: Props) {
           </div>
         )}
 
-        {/* ── Plan wählen ── */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Plan wählen</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {PLANS.map(p => {
-              const active = plan === p.id
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPlan(p.id as 'kostenlos' | 'premium')}
-                  style={{
-                    padding: '16px 18px', textAlign: 'left',
-                    border: `2px solid ${active ? '#18181b' : '#e5e5e5'}`,
-                    borderRadius: 12, background: active ? '#18181b' : '#fff',
-                    cursor: 'pointer', transition: 'all .12s',
-                    position: 'relative',
-                  }}
-                >
-                  {p.featured && (
-                    <span style={{
-                      position: 'absolute', top: -1, right: 12,
-                      background: '#E05C1A', color: '#fff',
-                      fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: '0 0 6px 6px',
-                      letterSpacing: '0.05em',
-                    }}>
-                      EMPFOHLEN
-                    </span>
-                  )}
-                  <div style={{ fontSize: 16, fontWeight: 800, color: active ? '#fff' : '#111', marginBottom: 2 }}>{p.price}</div>
-                  <div style={{ fontSize: 12, color: active ? '#a1a1aa' : '#888', marginBottom: 10 }}>{p.sub}</div>
-                  {p.features.map(f => (
-                    <div key={f} style={{ fontSize: 12, color: active ? '#d4d4d8' : '#555', marginBottom: 3 }}>✓ {f}</div>
-                  ))}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* ── Form ── */}
         <form onSubmit={submit}>
           <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
@@ -336,17 +255,17 @@ export default function AusschreibenClient({ profil, userId }: Props) {
 
             <button type="submit" disabled={saving || !profil} style={{
               padding: '13px 0',
-              background: saving || !profil ? '#f5f5f5' : plan === 'premium' ? '#E05C1A' : '#18181b',
+              background: saving || !profil ? '#f5f5f5' : '#18181b',
               color: saving || !profil ? '#bbb' : '#fff',
               borderRadius: 9, border: 'none', fontSize: 14, fontWeight: 700,
               cursor: saving || !profil ? 'not-allowed' : 'pointer',
             }}>
-              {saving
-                ? 'Wird veröffentlicht…'
-                : plan === 'premium'
-                ? '→ Weiter zu Stripe (€49)'
-                : '+ Stelle kostenlos veröffentlichen'}
+              {saving ? 'Wird veröffentlicht…' : '+ Stelle kostenlos ausschreiben'}
             </button>
+
+            <div style={{ textAlign: 'center', fontSize: 11, color: '#aaa', marginTop: -8 }}>
+              Kostenlos inserieren — für immer
+            </div>
           </div>
         </form>
       </div>
