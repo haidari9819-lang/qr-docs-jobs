@@ -20,7 +20,7 @@ interface Job {
   firmen_profile?: {
     firmenname: string
     branche?: string
-    standort?: string
+    ort?: string
     strasse?: string
     plz?: string
     email?: string
@@ -375,7 +375,7 @@ export default function JobDetailClient({ job }: { job: Job }) {
                 </div>
               </div>
               {[
-                { label: 'Standort',  value: [job.firmen_profile?.strasse, job.firmen_profile?.plz, job.firmen_profile?.standort].filter(Boolean).join(', ') },
+                { label: 'Standort',  value: [job.firmen_profile?.strasse, job.firmen_profile?.plz, job.firmen_profile?.ort].filter(Boolean).join(', ') },
                 { label: 'Branche',   value: job.firmen_profile?.branche },
                 { label: 'Ausgeschrieben', value: formatDate(job.created_at) },
               ].filter(r => r.value).map(r => (

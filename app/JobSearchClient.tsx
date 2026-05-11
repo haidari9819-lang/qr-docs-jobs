@@ -18,7 +18,7 @@ interface Job {
   featured: boolean
   created_at: string
   firma_id: string
-  firmen_profile?: { firmenname: string; branche?: string; standort?: string; plan?: string }
+  firmen_profile?: { firmenname: string; branche?: string; ort?: string; plan?: string }
 }
 
 interface Props {

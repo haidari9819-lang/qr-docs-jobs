@@ -29,7 +29,7 @@ export default async function StadtBranchePage({ params }: Props) {
   const supabase = await createClient()
   const { data: jobs } = await supabase
     .from('job_listings')
-    .select('*, firmen_profile(firmenname, branche, standort, plan)')
+    .select('*, firmen_profile(firmenname, branche, ort, plan)')
     .eq('aktiv', true)
     .eq('branche', brancheInfo.dbValue)
     .ilike('standort', `%${stadtLabel}%`)

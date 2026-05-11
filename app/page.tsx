@@ -44,13 +44,20 @@ const faqSchema = {
 export default async function HomePage() {
   const supabase = getAdminClient()
 
-  const { data: jobs, error: jobsError } = await supabase
+  const { data: jobs } = await supabase
     .from('job_listings')
     .select('*')
     .eq('aktiv', true)
     .order('featured', { ascending: false })
     .order('created_at',  { ascending: false })
-    .limit(50); console.error("JOBS_ERROR:", JSON.stringify(jobsError)); console.log("JOBS_COUNT:", jobs?.length)
+    .limit(50)
+
+  const firmaIds = [...new Set((jobs ?? []).map(j => j.firma_id).filter(Boolean))]
+  const { data: firmen } = firmaIds.length
+    ? await supabase.from('firmen_profile').select('id, firmenname, branche, ort, plan').in('id', firmaIds)
+    : { data: [] }
+  const firmenMap = Object.fromEntries((firmen ?? []).map(f => [f.id, f]))
+  const jobsMitFirma = (jobs ?? []).map(j => ({ ...j, firmen_profile: firmenMap[j.firma_id] ?? null }))
 
   const [{ count: jobCount }, { count: firmaCount }, { count: ausbildungCount }] = await Promise.all([
     supabase.from('job_listings').select('*',       { count: 'exact', head: true }).eq('aktiv', true),
@@ -65,7 +72,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <JobSearchClient
-        initialJobs={jobs ?? []}
+        initialJobs={jobsMitFirma}
         stats={{ jobs: jobCount ?? 0, firmen: firmaCount ?? 0, ausbildung: ausbildungCount ?? 0 }}
       />
     </>

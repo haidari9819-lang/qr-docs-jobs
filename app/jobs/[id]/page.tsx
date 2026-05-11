@@ -62,30 +62,38 @@ export default async function JobPage({ params }: Props) {
 
   if (!job) notFound()
 
+  const { data: firma } = await supabase
+    .from('firmen_profile')
+    .select('id, firmenname, branche, ort, plan')
+    .eq('id', job.firma_id)
+    .single()
+
+  const jobMitFirma = { ...job, firmen_profile: firma ?? null }
+
   const schema = {
     '@context': 'https://schema.org',
     '@type':    'JobPosting',
-    title:       job.titel,
-    description: job.beschreibung,
-    datePosted:  job.created_at,
-    employmentType: job.stellenart,
+    title:       jobMitFirma.titel,
+    description: jobMitFirma.beschreibung,
+    datePosted:  jobMitFirma.created_at,
+    employmentType: jobMitFirma.stellenart,
     jobLocation: {
       '@type':  'Place',
-      address:  { '@type': 'PostalAddress', addressLocality: job.standort, addressCountry: 'DE' },
+      address:  { '@type': 'PostalAddress', addressLocality: jobMitFirma.standort, addressCountry: 'DE' },
     },
     hiringOrganization: {
       '@type':  'Organization',
-      name:     job.firmen_profile?.firmenname ?? '',
+      name:     jobMitFirma.firmen_profile?.firmenname ?? '',
       sameAs:   BASE,
     },
-    ...(job.gehalt_min ? {
+    ...(jobMitFirma.gehalt_min ? {
       baseSalary: {
         '@type': 'MonetaryAmount',
         currency: 'EUR',
         value: {
           '@type':    'QuantitativeValue',
-          minValue:   job.gehalt_min,
-          maxValue:   job.gehalt_max ?? job.gehalt_min,
+          minValue:   jobMitFirma.gehalt_min,
+          maxValue:   jobMitFirma.gehalt_max ?? jobMitFirma.gehalt_min,
           unitText:   'MONTH',
         },
       },
@@ -98,7 +106,7 @@ export default async function JobPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <JobDetailClient job={job} />
+      <JobDetailClient job={jobMitFirma} />
     </>
   )
 }

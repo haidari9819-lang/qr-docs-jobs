@@ -10,7 +10,7 @@ interface Job {
   standort: string
   gehalt_min?: number
   created_at: string
-  firmen_profile?: { firmenname: string; standort?: string; plan?: string }
+  firmen_profile?: { firmenname: string; ort?: string; plan?: string }
 }
 
 function JobRow({ job }: { job: Job }) {
@@ -51,7 +51,7 @@ export default async function StellensartPage({ artSlug }: { artSlug: string }) 
   const supabase = getAdminClient()
   const { data: jobs } = await supabase
     .from('job_listings')
-    .select('*, firmen_profile(firmenname, standort, plan)')
+    .select('*, firmen_profile(firmenname, ort, plan)')
     .eq('aktiv', true)
     .eq('stellenart', info.dbValue)
     .order('featured', { ascending: false })
