@@ -17,3 +17,53 @@ input, textarea, select, button {
 
 a { color: inherit; }
 
+/* ── Bottom Nav ──────────────────────────────────────────────── */
+.bottom-nav        { display: flex; }
+@media (min-width: 768px) { .bottom-nav { display: none; } }
+
+/* ── Responsive Job Grid ─────────────────────────────────────── */
+.job-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+.job-grid-sidebar-left,
+.job-grid-sidebar-right { display: block; }
+
+@media (max-width: 767px) {
+  .job-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 12px;
+  }
+  .job-grid-sidebar-left,
+  .job-grid-sidebar-right { display: none; }
+}
+
+/* ── Mobile Hero ─────────────────────────────────────────────── */
+.hero-section { padding: 40px 32px 32px; }
+@media (max-width: 767px) { .hero-section { padding: 24px 16px 20px; } }
+
+/* ── Mobile Search Bar ───────────────────────────────────────── */
+.search-bar { display: flex; gap: 8px; }
+@media (max-width: 767px) {
+  .search-bar { flex-direction: column; gap: 6px; }
+  .search-bar-region { border-left: none !important; border-top: 1px solid #e5e5e5; }
+  .search-bar-btn { width: 100%; padding: 10px !important; }
+}
+
+/* ── Mobile Job Card ─────────────────────────────────────────── */
+.job-card-footer { display: flex; align-items: center; justify-content: space-between; }
+@media (max-width: 767px) {
+  .job-card-footer { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 4px; }
+  .job-card-apply  { display: block; text-align: center; padding: 10px; background: #18181b; color: #fff !important; border-radius: 8px; font-weight: 600; min-height: 44px; line-height: 24px; }
+}
+
+/* ── Mobile padding bottom (space for BottomNav) ─────────────── */
+@media (max-width: 767px) {
+  .has-bottom-nav { padding-bottom: 72px; }
+}
+

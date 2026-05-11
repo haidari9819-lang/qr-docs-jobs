@@ -129,7 +129,7 @@ function JobCard({ job }: { job: Job }) {
             ))}
           </div>
           {/* Footer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="job-card-footer">
             <div style={{ fontSize: 11, color: '#999' }}>
               {job.gehalt_min && job.gehalt_max
                 ? `${job.gehalt_min.toLocaleString('de')}–${job.gehalt_max.toLocaleString('de')} €/Jahr`
@@ -139,7 +139,7 @@ function JobCard({ job }: { job: Job }) {
               {job.gehalt_min ? ' · ' : ''}
               {formatDate(job.created_at)}
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#18181b' }}>Bewerben →</span>
+            <span className="job-card-apply" style={{ fontSize: 11, fontWeight: 600, color: '#18181b' }}>Bewerben →</span>
           </div>
         </div>
       </div>
@@ -171,7 +171,7 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
       <Nav />
 
       {/* Hero */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e5e5e5', padding: '40px 32px 32px' }}>
+      <div className="hero-section" style={{ background: '#fff', borderBottom: '1px solid #e5e5e5' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
           <h1 style={{ fontSize: 32, fontWeight: 800, color: '#111', letterSpacing: '-0.04em', margin: '0 0 8px' }}>
             Der Jobmarkt für KMU & Handwerk
@@ -181,20 +181,21 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
           </p>
 
           {/* Search bar */}
-          <div style={{ display: 'flex', gap: 8, background: '#f8f8f7', border: '1px solid #e5e5e5', borderRadius: 12, padding: 8 }}>
+          <div className="search-bar" style={{ background: '#f8f8f7', border: '1px solid #e5e5e5', borderRadius: 12, padding: 8 }}>
             <input
               value={q}
               onChange={e => setQ(e.target.value)}
               placeholder="Job oder Stichwort suchen…"
-              style={{ flex: 2, padding: '8px 12px', border: 'none', background: 'transparent', fontSize: 14, color: '#111', outline: 'none' }}
+              style={{ flex: 2, padding: '8px 12px', border: 'none', background: 'transparent', fontSize: 14, color: '#111', outline: 'none', minWidth: 0 }}
             />
             <input
+              className="search-bar-region"
               value={region}
               onChange={e => setRegion(e.target.value)}
               placeholder="Region / PLZ"
-              style={{ flex: 1, padding: '8px 12px', border: 'none', background: 'transparent', fontSize: 14, color: '#111', outline: 'none', borderLeft: '1px solid #e5e5e5' }}
+              style={{ flex: 1, padding: '8px 12px', border: 'none', background: 'transparent', fontSize: 14, color: '#111', outline: 'none', borderLeft: '1px solid #e5e5e5', minWidth: 0 }}
             />
-            <button style={{
+            <button className="search-bar-btn" style={{
               padding: '8px 20px', background: '#18181b', color: '#fff',
               borderRadius: 8, border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer',
             }}>
@@ -219,10 +220,10 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
       </div>
 
       {/* 3-column layout */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 32px', display: 'grid', gridTemplateColumns: '220px 1fr 260px', gap: 16 }}>
+      <div className="job-grid has-bottom-nav">
 
         {/* LEFT: Filter */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="job-grid-sidebar-left" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '16px 16px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Stellenart</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -274,7 +275,7 @@ export default function JobSearchClient({ initialJobs, stats }: Props) {
         </div>
 
         {/* RIGHT: Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className="job-grid-sidebar-right" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Branchen Links */}
           <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '16px 16px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Jobs nach Branche</div>

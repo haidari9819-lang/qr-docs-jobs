@@ -1,7 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
-const ORANGE = '#E05C1A'
+const ORANGE = '#e8521a'
 
 interface Job {
   id: string
@@ -18,15 +18,18 @@ export default function BewerbenClient({ job }: { job: Job }) {
   const [name,        setName]        = useState('')
   const [telefon,     setTelefon]     = useState('')
   const [nachricht,   setNachricht]   = useState('')
+  const [dateiName,   setDateiName]   = useState('')
   const [submitting,  setSubmitting]  = useState(false)
   const [success,     setSuccess]     = useState(false)
   const [error,       setError]       = useState('')
   const [confetti,    setConfetti]    = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
 
-  // Fire confetti pieces on success
   useEffect(() => {
     if (success) {
       setConfetti(true)
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(200)
       const t = setTimeout(() => setConfetti(false), 4000)
       return () => clearTimeout(t)
     }
@@ -39,10 +42,12 @@ export default function BewerbenClient({ job }: { job: Job }) {
     setError('')
     try {
       const form = new FormData()
-      form.append('job_id',     job.id)
-      form.append('name',       name)
-      form.append('telefon',    telefon)
+      form.append('job_id',      job.id)
+      form.append('name',        name)
+      form.append('telefon',     telefon)
       form.append('anschreiben', nachricht)
+      const file = fileRef.current?.files?.[0] ?? cameraRef.current?.files?.[0]
+      if (file) form.append('lebenslauf', file)
 
       const res  = await fetch('/api/bewerbung', { method: 'POST', body: form })
       const data = await res.json()
@@ -164,6 +169,35 @@ export default function BewerbenClient({ job }: { job: Job }) {
               fontFamily: 'inherit',
             }}
           />
+        </div>
+
+        {/* Foto / Gesellenbrief */}
+        <div>
+          <label style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+            Foto / Gesellenbrief (optional)
+          </label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {/* Upload from files */}
+            <button type="button" onClick={() => fileRef.current?.click()} style={{
+              flex: 1, padding: '12px 0', border: '1.5px dashed #e5e5e5', borderRadius: 10,
+              background: dateiName ? '#f0fdf4' : '#fafafa', cursor: 'pointer',
+              fontSize: 13, color: dateiName ? '#16a34a' : '#888', fontWeight: 500,
+            }}>
+              {dateiName ? `✓ ${dateiName.length > 20 ? dateiName.slice(0, 18) + '…' : dateiName}` : '📎 Datei'}
+            </button>
+            {/* Camera — opens device camera directly */}
+            <button type="button" onClick={() => cameraRef.current?.click()} style={{
+              width: 52, padding: '12px 0', border: '1.5px dashed #e5e5e5', borderRadius: 10,
+              background: '#fafafa', cursor: 'pointer', fontSize: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }} title="Foto aufnehmen">
+              📷
+            </button>
+          </div>
+          <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png,.pdf" style={{ display: 'none' }}
+            onChange={e => setDateiName(e.target.files?.[0]?.name ?? '')} />
+          <input ref={cameraRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+            onChange={e => setDateiName(e.target.files?.[0]?.name ?? '')} />
         </div>
 
         {error && (
