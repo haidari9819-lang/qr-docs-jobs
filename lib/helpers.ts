@@ -1,3 +1,12 @@
+// ── Slug ─────────────────────────────────────────────────────────────────────
+export function toSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 // ── Color hash for firm avatars ─────────────────────────────────────────────
 export function avatarColor(str: string): string {
   const palette = ['#0ea5e9', '#6366f1', '#8b5cf6', '#f59e0b', '#22c55e', '#ec4899', '#f97316', '#14b8a6']
