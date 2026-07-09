@@ -40,6 +40,7 @@ yarn-error.log*
 .env.test.local
 *.key
 secrets/
+.milansql_token
 *.pem
 *.p12
 *.pfx
