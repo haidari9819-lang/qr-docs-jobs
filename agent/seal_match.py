@@ -58,6 +58,18 @@ def seal_match(match_id: int) -> dict:
             "checksum": row.get("checksum", ""),
         }
 
+    # Review-Freigabe prüfen
+    if row.get("review_status") != "freigegeben":
+        return {
+            "success": False,
+            "error": "not_reviewed",
+            "message": (
+                f"Match kann nicht versiegelt werden: review_status ist "
+                f"'{row.get('review_status', 'unbekannt')}', erwartet 'freigegeben'. "
+                f"Nur vom Reviewer freigegebene Matches duerfen versiegelt werden."
+            ),
+        }
+
     # SHA-256 berechnen (gleiche Felder-Konkatenation wie seal_invoice)
     data = (
         str(row["id"])

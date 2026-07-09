@@ -252,9 +252,10 @@ def main() -> None:
         "review_freigegeben": review_result.get("freigegeben", False),
         "review_beanstandungen": review_result.get("beanstandungen", []),
     }
+    final_status = "freigegeben" if review_result.get("freigegeben", False) else "menschliche_pruefung"
     query(
-        "UPDATE match_objekte SET provenienz = ? WHERE id = ?",
-        [json.dumps(provenienz_data, ensure_ascii=False), match_id],
+        "UPDATE match_objekte SET provenienz = ?, review_status = ? WHERE id = ?",
+        [json.dumps(provenienz_data, ensure_ascii=False), final_status, match_id],
     )
     print(f"\n  -> provenienz in match_objekte ID={match_id} gespeichert.")
 
