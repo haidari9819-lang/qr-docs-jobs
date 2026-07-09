@@ -19,16 +19,21 @@ export async function POST(req: NextRequest) {
 
     const admin = getAdminClient()
 
-    // Load job + firma info for email
+    // Load job info (ohne Join — firmen_profile separat laden)
     const { data: job, error: jobError } = await admin
       .from('job_listings')
-      .select('titel, firma_id, firmen_profile(firmenname, email)')
+      .select('titel, firma_id')
       .eq('id', job_id)
       .single()
 
     if (jobError || !job) {
       return NextResponse.json({ error: 'Stelle nicht gefunden' }, { status: 404 })
     }
+
+    // Firma-Infos für E-Mail-Benachrichtigung (optional, darf nicht blocken)
+    const { data: firma } = job.firma_id
+      ? await admin.from('firmen_profile').select('firmenname, email').eq('id', job.firma_id).single()
+      : { data: null }
 
     // Optional: upload CV to Supabase Storage
     let lebenslauf_url: string | null = null
@@ -74,10 +79,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Send email notification to firma
-    const firmaEmail = (job?.firmen_profile as any)?.email
+    const firmaEmail = firma?.email
     if (firmaEmail && process.env.RESEND_API_KEY) {
-      const jobTitel = job?.titel ?? 'Ihrer Stelle'
-      const firmaName = (job?.firmen_profile as any)?.firmenname ?? 'Ihr Unternehmen'
+      const jobTitel = job.titel ?? 'Ihrer Stelle'
+      const firmaName = firma?.firmenname ?? 'Ihr Unternehmen'
       await resend.emails.send({
         from:    'QR-Docs Jobs <jobs@qr-docs.de>',
         to:      firmaEmail,
