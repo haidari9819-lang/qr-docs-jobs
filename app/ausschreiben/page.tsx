@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AusschreibenClient from './AusschreibenClient'
 
@@ -8,7 +8,8 @@ export default async function AusschreibenPage() {
 
   if (!user) redirect('/login?redirect=/ausschreiben')
 
-  const { data: profil } = await supabase
+  const admin = getAdminClient()
+  const { data: profil } = await admin
     .from('firmen_profile')
     .select('id, firmenname, branche, standort, plan')
     .eq('user_id', user.id)

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import JobsDashboardClient from './JobsDashboardClient'
 
@@ -8,7 +8,8 @@ export default async function JobsDashboardPage() {
 
   if (!user) redirect('/login?redirect=/dashboard/jobs')
 
-  const { data: profil } = await supabase
+  const admin = getAdminClient()
+  const { data: profil } = await admin
     .from('firmen_profile')
     .select('id, firmenname, plan')
     .eq('user_id', user.id)
