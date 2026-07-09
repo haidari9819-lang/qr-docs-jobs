@@ -19,9 +19,44 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import os
+
 from flask import Flask, request, jsonify
 
 from sync import sync_bewerbung, sync_stelle
+
+# ─── .env.local laden ────────────────────────────────────────
+
+def _load_env_local() -> None:
+    env_path = Path(__file__).resolve().parent.parent / ".env.local"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        eq = line.find("=")
+        if eq > 0:
+            key, val = line[:eq], line[eq + 1:]
+            if key not in os.environ:
+                os.environ[key] = val
+
+_load_env_local()
+
+SYNC_SERVER_KEY = os.environ.get("SYNC_SERVER_KEY", "")
+
+# ─── Auth ───────────────────────────────────────────────────
+
+def _check_sync_key():
+    """Prüft X-Sync-Key Header — /health bleibt offen."""
+    if request.path == "/health":
+        return None  # kein Auth nötig
+    if not SYNC_SERVER_KEY:
+        return None  # kein Key konfiguriert → alles erlauben (Dev-Modus)
+    key = request.headers.get("X-Sync-Key", "")
+    if key != SYNC_SERVER_KEY:
+        log.warning("401 — ungültiger X-Sync-Key von %s", request.remote_addr)
+        return jsonify({"success": False, "error": "unauthorized"}), 401
 
 # ─── Logging ─────────────────────────────────────────────────
 
@@ -40,6 +75,7 @@ log = logging.getLogger("sync_server")
 # ─── Flask App ───────────────────────────────────────────────
 
 app = Flask(__name__)
+app.before_request(_check_sync_key)
 
 
 @app.route("/sync/bewerbung", methods=["POST"])

@@ -172,8 +172,8 @@ export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props
                       ) : bews.map(b => (
                         <div key={b.id} style={{ padding: '12px 18px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 14 }}>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{b.name}</div>
-                            <div style={{ fontSize: 11, color: '#999' }}>{b.email}{b.telefon ? ` · ${b.telefon}` : ''}</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{b.bewerber_name}</div>
+                            <div style={{ fontSize: 11, color: '#999' }}>{b.bewerber_email}{b.bewerber_telefon ? ` · ${b.bewerber_telefon}` : ''}</div>
                             {b.anschreiben && (
                               <div style={{ fontSize: 11, color: '#666', marginTop: 4, lineHeight: 1.5 }}>
                                 {b.anschreiben.slice(0, 120)}{b.anschreiben.length > 120 ? '…' : ''}

@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
 
     const { error } = await admin.from('job_bewerbungen').insert({
       job_id,
-      name,
-      telefon,
-      email: email || null,
+      bewerber_name: name,
+      bewerber_telefon: telefon,
+      bewerber_email: email || null,
       anschreiben: anschreiben || null,
       lebenslauf_url,
       status: 'neu',
@@ -58,7 +58,10 @@ export async function POST(req: NextRequest) {
       const syncUrl = process.env.SYNC_SERVER_URL || 'http://127.0.0.1:8090'
       fetch(`${syncUrl}/sync/bewerbung`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Sync-Key': process.env.SYNC_SERVER_KEY || '',
+        },
         body: JSON.stringify({ job_id, name, telefon, email, anschreiben, lebenslauf_url }),
       }).catch((e) => console.error('[sync] bewerbung fehlgeschlagen:', e.message))
     } catch (e: any) {

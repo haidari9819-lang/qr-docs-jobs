@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
       const syncUrl = process.env.SYNC_SERVER_URL || 'http://127.0.0.1:8090'
       fetch(`${syncUrl}/sync/stelle`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Sync-Key': process.env.SYNC_SERVER_KEY || '',
+        },
         body: JSON.stringify({
           job_id: data.id,
           titel,
