@@ -13,7 +13,98 @@ import json
 from datetime import datetime, timezone
 
 from milansql_client import insert, query
-from tfidf import compute_single_vector
+from tfidf import compute_single_vector, cosine_similarity, tokenize
+
+
+def _keyword_overlap(text_a: str, text_b: str) -> list[str]:
+    """Gemeinsame Wörter (>= 4 Zeichen) zwischen zwei Texten."""
+    words_a = set(w for w in tokenize(text_a) if len(w) >= 4)
+    words_b = set(w for w in tokenize(text_b) if len(w) >= 4)
+    return sorted(words_a & words_b)[:20]
+
+
+def _save_top_matches(
+    bewerber_id: int,
+    bewerber_vec: list[float],
+    bewerber_text: str,
+    stelle_id: int,
+    stelle_vec: list[float],
+    stelle_text: str,
+    score: float,
+    now: str,
+) -> dict:
+    """Speichert ein Match-Objekt in MilanSQL."""
+    overlap = _keyword_overlap(bewerber_text, stelle_text)
+    result = insert("match_objekte", {
+        "bewerber_id": bewerber_id,
+        "stelle_id": stelle_id,
+        "score": int(round(score * 10000)),
+        "keyword_overlap": json.dumps(overlap),
+        "review_status": "entwurf",
+        "provenienz": "",
+        "created_at": now,
+    })
+    return {"match_id": result.row_count, "score": score, "overlap_count": len(overlap)}
+
+
+def _match_bewerber_gegen_stellen(
+    bewerber_id: int, bewerber_vec: list[float], bewerber_text: str
+) -> list[dict]:
+    """Matcht einen Bewerber gegen alle aktiven Stellen, speichert Top 5."""
+    now = datetime.now(timezone.utc).isoformat()
+    rows = query(
+        "SELECT id, anforderungs_vector, anforderungen_text FROM stellen_anzeigen WHERE status = 'aktiv'"
+    )
+    if not rows.rows:
+        return []
+
+    scores = []
+    for row in rows.rows:
+        sid = int(row[0])
+        try:
+            svec = json.loads(row[1])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        stext = row[2] or ""
+        score = cosine_similarity(bewerber_vec, svec)
+        scores.append((sid, svec, stext, score))
+
+    scores.sort(key=lambda x: x[3], reverse=True)
+    matches = []
+    for sid, svec, stext, score in scores[:5]:
+        m = _save_top_matches(bewerber_id, bewerber_vec, bewerber_text, sid, svec, stext, score, now)
+        matches.append(m)
+    return matches
+
+
+def _match_stelle_gegen_bewerber(
+    stelle_id: int, stelle_vec: list[float], stelle_text: str
+) -> list[dict]:
+    """Matcht eine Stelle gegen alle aktiven Bewerber, speichert Top 5."""
+    now = datetime.now(timezone.utc).isoformat()
+    rows = query(
+        "SELECT id, skill_vector, skills_text FROM bewerber_profile WHERE status = 'aktiv'"
+    )
+    if not rows.rows:
+        return []
+
+    scores = []
+    for row in rows.rows:
+        bid = int(row[0])
+        try:
+            bvec = json.loads(row[1])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        btext = row[2] or ""
+        score = cosine_similarity(bvec, stelle_vec)
+        scores.append((bid, bvec, btext, score))
+
+    scores.sort(key=lambda x: x[3], reverse=True)
+    matches = []
+    for bid, bvec, btext, score in scores[:5]:
+        m = _save_top_matches(bid, bvec, btext, stelle_id, stelle_vec, stelle_text, score, now)
+        matches.append(m)
+    return matches
 
 
 def sync_bewerbung(
@@ -70,11 +161,15 @@ def sync_bewerbung(
     })
     bewerber_id = result.row_count  # insert() gibt vergebene ID zurück
 
+    # Top-5-Matches gegen aktive Stellen berechnen
+    matches = _match_bewerber_gegen_stellen(bewerber_id, vec, skills_text)
+
     return {
         "success": True,
         "bewerber_id": bewerber_id,
-        "skills_text": skills_text[:200],  # Vorschau
+        "skills_text": skills_text[:200],
         "vector_dim": len(vec),
+        "matches": matches,
     }
 
 
@@ -123,11 +218,15 @@ def sync_stelle(
     })
     stelle_id = result.row_count
 
+    # Top-5-Matches gegen aktive Bewerber berechnen
+    matches = _match_stelle_gegen_bewerber(stelle_id, vec, anforderungen_text)
+
     return {
         "success": True,
         "stelle_id": stelle_id,
         "anforderungen_text": anforderungen_text[:200],
         "vector_dim": len(vec),
+        "matches": matches,
     }
 
 

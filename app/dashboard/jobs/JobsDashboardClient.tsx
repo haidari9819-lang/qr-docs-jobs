@@ -1,6 +1,24 @@
 'use client'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { formatDate } from '@/lib/helpers'
+
+interface VeraMatch {
+  match_id: number
+  bewerber_id: number
+  bewerber_name: string
+  score: number
+  score_pct: number
+  keyword_overlap: string[]
+  review_status: string
+  has_begruendung: boolean
+}
+
+interface VeraData {
+  matches: VeraMatch[]
+  total: number
+  loading: boolean
+  begruendung?: Record<number, { text: string; loading: boolean }>
+}
 
 interface Job {
   id: string
@@ -40,6 +58,42 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
 export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props) {
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [vera, setVera] = useState<Record<string, VeraData>>({})
+
+  const loadVera = useCallback(async (jobId: string) => {
+    if (vera[jobId]?.matches.length) return // schon geladen
+    setVera(prev => ({ ...prev, [jobId]: { matches: [], total: 0, loading: true } }))
+    try {
+      const res = await fetch(`/api/vera-matches/${jobId}`)
+      const data = await res.json()
+      setVera(prev => ({ ...prev, [jobId]: { matches: data.matches || [], total: data.total || 0, loading: false } }))
+    } catch {
+      setVera(prev => ({ ...prev, [jobId]: { matches: [], total: 0, loading: false } }))
+    }
+  }, [vera])
+
+  const loadBegruendung = useCallback(async (jobId: string, matchId: number) => {
+    setVera(prev => {
+      const v = prev[jobId]
+      if (!v) return prev
+      return { ...prev, [jobId]: { ...v, begruendung: { ...v.begruendung, [matchId]: { text: '', loading: true } } } }
+    })
+    try {
+      const res = await fetch(`/api/vera-matches/${matchId}/begruenden`, { method: 'POST' })
+      const data = await res.json()
+      setVera(prev => {
+        const v = prev[jobId]
+        if (!v) return prev
+        return { ...prev, [jobId]: { ...v, begruendung: { ...v.begruendung, [matchId]: { text: data.begruendung || data.error || 'Keine Begründung', loading: false } } } }
+      })
+    } catch {
+      setVera(prev => {
+        const v = prev[jobId]
+        if (!v) return prev
+        return { ...prev, [jobId]: { ...v, begruendung: { ...v.begruendung, [matchId]: { text: 'Fehler beim Laden', loading: false } } } }
+      })
+    }
+  }, [])
 
   const jobBewerbungen = (jobId: string) => bewerbungen.filter(b => b.job_id === jobId)
   const activeJobs     = jobs.filter(j => j.aktiv)
@@ -190,6 +244,59 @@ export default function JobsDashboardClient({ profil, jobs, bewerbungen }: Props
                           </span>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* VERA AI Matching */}
+                  {job.aktiv && (
+                    <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 18px', background: '#fafbff' }}>
+                      {!vera[job.id] ? (
+                        <button onClick={() => loadVera(job.id)} style={{
+                          padding: '6px 14px', background: '#eef2ff', border: '1px solid #c7d2fe',
+                          borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#4f46e5',
+                        }}>
+                          VERA Matching laden
+                        </button>
+                      ) : vera[job.id].loading ? (
+                        <div style={{ fontSize: 12, color: '#999' }}>Matches werden geladen...</div>
+                      ) : vera[job.id].matches.length === 0 ? (
+                        <div style={{ fontSize: 12, color: '#999' }}>Noch keine VERA-Matches vorhanden</div>
+                      ) : (
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: '#4f46e5', marginBottom: 8 }}>
+                            {vera[job.id].total} Kandidaten gefunden, bester Match: {vera[job.id].matches[0]?.score_pct}%
+                          </div>
+                          {vera[job.id].matches.map(m => {
+                            const bg = vera[job.id].begruendung?.[m.match_id]
+                            return (
+                              <div key={m.match_id} style={{ padding: '8px 0', borderBottom: '1px solid #eef0f5' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                  <div style={{ flex: 1 }}>
+                                    <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{m.bewerber_name}</span>
+                                    <span style={{ fontSize: 11, color: '#999', marginLeft: 8 }}>{m.score_pct}% Match</span>
+                                  </div>
+                                  <div style={{ fontSize: 10, color: '#888' }}>{m.keyword_overlap.slice(0, 3).join(', ')}{m.keyword_overlap.length > 3 ? ` +${m.keyword_overlap.length - 3}` : ''}</div>
+                                  {!bg ? (
+                                    <button onClick={() => loadBegruendung(job.id, m.match_id)} style={{
+                                      padding: '4px 10px', background: '#fff', border: '1px solid #c7d2fe',
+                                      borderRadius: 6, fontSize: 11, cursor: 'pointer', color: '#4f46e5', fontWeight: 600,
+                                    }}>
+                                      Begr&uuml;ndung
+                                    </button>
+                                  ) : bg.loading ? (
+                                    <span style={{ fontSize: 11, color: '#999' }}>AI denkt...</span>
+                                  ) : null}
+                                </div>
+                                {bg && !bg.loading && (
+                                  <div style={{ marginTop: 6, padding: '8px 10px', background: '#f8f9ff', borderRadius: 6, fontSize: 12, color: '#333', lineHeight: 1.5 }}>
+                                    {bg.text}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
