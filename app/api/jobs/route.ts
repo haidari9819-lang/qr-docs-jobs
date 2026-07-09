@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
 
     const admin = getAdminClient()
     const { data, error } = await admin.from('job_listings').insert({
-      user_id: user.id,
       firma_id,
       titel,
       stellenart:  stellenart  ?? 'Vollzeit',
