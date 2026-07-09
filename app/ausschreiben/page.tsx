@@ -11,7 +11,7 @@ export default async function AusschreibenPage() {
   const admin = getAdminClient()
   const { data: profil } = await admin
     .from('firmen_profile')
-    .select('id, firmenname, branche, standort, plan')
+    .select('id, firmenname, branche, ort, plan')
     .eq('user_id', user.id)
     .maybeSingle()
 

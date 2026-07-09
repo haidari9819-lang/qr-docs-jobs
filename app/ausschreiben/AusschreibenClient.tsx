@@ -6,7 +6,7 @@ interface Profil {
   id: string
   firmenname: string
   branche?: string
-  standort?: string
+  ort?: string
   plan?: string
 }
 
@@ -22,7 +22,7 @@ export default function AusschreibenClient({ profil, userId }: Props) {
   const [titel,        setTitel]        = useState('')
   const [stellenart,   setStellenart]   = useState('Vollzeit')
   const [branche,      setBranche]      = useState(profil?.branche ?? '')
-  const [standort,     setStandort]     = useState(profil?.standort ?? '')
+  const [standort,     setStandort]     = useState(profil?.ort ?? '')
   const [beschreibung, setBeschreibung] = useState('')
   const [gehaltMin,    setGehaltMin]    = useState('')
   const [gehaltMax,    setGehaltMax]    = useState('')
@@ -177,7 +177,7 @@ export default function AusschreibenClient({ profil, userId }: Props) {
           <div style={{ background: '#f8f8f7', border: '1px solid #e5e5e5', borderRadius: 10, padding: '14px 16px', marginBottom: 20 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>Ausschreiber</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>{profil.firmenname}</div>
-            <div style={{ fontSize: 11, color: '#999' }}>{profil.branche} · {profil.standort}</div>
+            <div style={{ fontSize: 11, color: '#999' }}>{profil.branche} · {profil.ort}</div>
           </div>
         )}
 
