@@ -168,7 +168,7 @@ async function seedCounters(token: string) {
       [table.name],
     );
 
-    if (existing.success && existing.rows && existing.rows.length > 0) {
+    if (existing.success && Array.isArray(existing.rows) && existing.rows.length > 0) {
       console.log(`  ${table.name}: Counter existiert bereits, übersprungen.`);
       continue;
     }
