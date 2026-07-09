@@ -20,11 +20,15 @@ export async function POST(req: NextRequest) {
     const admin = getAdminClient()
 
     // Load job + firma info for email
-    const { data: job } = await admin
+    const { data: job, error: jobError } = await admin
       .from('job_listings')
       .select('titel, firma_id, firmen_profile(firmenname, email)')
       .eq('id', job_id)
       .single()
+
+    if (jobError || !job) {
+      return NextResponse.json({ error: 'Stelle nicht gefunden' }, { status: 404 })
+    }
 
     // Optional: upload CV to Supabase Storage
     let lebenslauf_url: string | null = null
@@ -43,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await admin.from('job_bewerbungen').insert({
       job_id,
-      firma_id: job?.firma_id,
+      firma_id: job.firma_id,
       bewerber_name: name,
       bewerber_telefon: telefon,
       bewerber_email: email || null,
