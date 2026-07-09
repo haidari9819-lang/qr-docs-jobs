@@ -32,6 +32,27 @@ export async function POST(req: NextRequest) {
     }).select().single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    // Sync → MilanSQL (fire-and-forget, darf nie die Stellenanzeige blockieren)
+    try {
+      const syncUrl = process.env.SYNC_SERVER_URL || 'http://127.0.0.1:8090'
+      fetch(`${syncUrl}/sync/stelle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job_id: data.id,
+          titel,
+          beschreibung,
+          skills,
+          branche,
+          standort,
+          user_id: user.id,
+        }),
+      }).catch((e) => console.error('[sync] stelle fehlgeschlagen:', e.message))
+    } catch (e: any) {
+      console.error('[sync] stelle error:', e.message)
+    }
+
     return NextResponse.json({ success: true, id: data.id, job: data })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })

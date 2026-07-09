@@ -53,6 +53,18 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
+    // Sync → MilanSQL (fire-and-forget, darf nie die Bewerbung blockieren)
+    try {
+      const syncUrl = process.env.SYNC_SERVER_URL || 'http://127.0.0.1:8090'
+      fetch(`${syncUrl}/sync/bewerbung`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id, name, telefon, email, anschreiben, lebenslauf_url }),
+      }).catch((e) => console.error('[sync] bewerbung fehlgeschlagen:', e.message))
+    } catch (e: any) {
+      console.error('[sync] bewerbung error:', e.message)
+    }
+
     // Send email notification to firma
     const firmaEmail = (job?.firmen_profile as any)?.email
     if (firmaEmail && process.env.RESEND_API_KEY) {
