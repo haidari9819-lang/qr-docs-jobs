@@ -16,9 +16,9 @@ interface Job {
 interface Bewerbung {
   id: string
   job_id: string
-  name: string
-  email: string
-  telefon?: string
+  bewerber_name: string
+  bewerber_email: string
+  bewerber_telefon?: string
   anschreiben?: string
   status: string
   created_at: string
