@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     // Load job + firma info for email
     const { data: job } = await admin
       .from('job_listings')
-      .select('titel, firmen_profile(firmenname, email)')
+      .select('titel, firma_id, firmen_profile(firmenname, email)')
       .eq('id', job_id)
       .single()
 
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await admin.from('job_bewerbungen').insert({
       job_id,
+      firma_id: job?.firma_id,
       bewerber_name: name,
       bewerber_telefon: telefon,
       bewerber_email: email || null,
