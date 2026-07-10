@@ -8,15 +8,27 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
     const body = await req.json()
-    const { titel, stellenart, branche, standort, beschreibung, gehalt_min, gehalt_max, skills, featured, firma_id, preis_typ } = body
+    const { titel, stellenart, branche, standort, beschreibung, gehalt_min, gehalt_max, skills, featured, preis_typ } = body
 
-    if (!titel || !standort || !beschreibung || !firma_id) {
+    if (!titel || !standort || !beschreibung) {
       return NextResponse.json({ error: 'Pflichtfelder fehlen' }, { status: 400 })
     }
 
     const admin = getAdminClient()
+
+    // firma_id aus Session ableiten, NICHT aus dem Request-Body vertrauen
+    const { data: profil } = await admin
+      .from('firmen_profile')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (!profil) {
+      return NextResponse.json({ error: 'Kein Firmenprofil gefunden' }, { status: 403 })
+    }
+
     const { data, error } = await admin.from('job_listings').insert({
-      firma_id,
+      firma_id: profil.id,
       titel,
       stellenart:  stellenart  ?? 'Vollzeit',
       branche:     branche     ?? '',
