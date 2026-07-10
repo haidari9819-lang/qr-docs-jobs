@@ -1,5 +1,22 @@
 import { NextRequest } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/server'
+import { createHmac } from 'crypto'
+
+function verifyToken(token: string, firmaId: string): boolean {
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SYNC_SERVER_KEY || 'fallback'
+  const decoded = Buffer.from(token, 'base64url').toString()
+  const parts = decoded.split(':')
+  if (parts.length !== 3) return false
+
+  const [id, ts, sig] = parts
+  if (id !== firmaId) return false
+
+  const age = Date.now() - Number(ts)
+  if (age > 24 * 60 * 60 * 1000) return false
+
+  const expected = createHmac('sha256', secret).update(`${id}:${ts}`).digest('base64url')
+  return sig === expected
+}
 
 export async function GET(req: NextRequest) {
   const firma_id = req.nextUrl.searchParams.get('firma_id')
@@ -17,13 +34,9 @@ export async function GET(req: NextRequest) {
 
   if (!firma_id || !token) return fail('Ungültiger Link')
 
+  if (!verifyToken(token, firma_id)) return fail('Link ungültig oder abgelaufen')
+
   try {
-    const decoded  = Buffer.from(token, 'base64url').toString()
-    const [id, ts] = decoded.split(':')
-    const age      = Date.now() - Number(ts)
-
-    if (id !== firma_id || age > 24 * 60 * 60 * 1000) return fail('Link abgelaufen')
-
     const admin = getAdminClient()
     await admin.from('firmen_profile').update({ verified: true }).eq('id', firma_id)
 

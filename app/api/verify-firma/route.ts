@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
+import { createHmac } from 'crypto'
+
+function signToken(firmaId: string, ts: number): string {
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SYNC_SERVER_KEY || 'fallback'
+  const payload = `${firmaId}:${ts}`
+  const sig = createHmac('sha256', secret).update(payload).digest('base64url')
+  return Buffer.from(`${payload}:${sig}`).toString('base64url')
+}
 
 // POST /api/verify-firma — sends verification email
 export async function POST(req: NextRequest) {
@@ -22,8 +30,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Keine Firmen-E-Mail hinterlegt' }, { status: 400 })
     }
 
-    // Generate a simple token (firma id + timestamp, base64)
-    const token = Buffer.from(`${profil.id}:${Date.now()}`).toString('base64url')
+    const ts    = Date.now()
+    const token = signToken(profil.id, ts)
     const base  = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://jobs.qr-docs.de'
 
     await resend.emails.send({
